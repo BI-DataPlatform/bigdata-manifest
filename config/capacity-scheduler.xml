@@ -1,0 +1,45 @@
+<configuration>
+
+  <!-- Queue 설정을 활성화 -->
+  <property>
+    <name>yarn.scheduler.capacity.root.queues</name>
+    <value>queueA,queueB</value>
+  </property>
+
+  <!-- queueA 설정 -->
+  <property>
+    <name>yarn.scheduler.capacity.root.queueA.capacity</name>
+    <value>50</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.queueA.maximum-capacity</name>
+    <value>100</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.queueA.user-limit-factor</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.queueA.state</name>
+    <value>RUNNING</value>
+  </property>
+
+  <!-- queueB 설정 -->
+  <property>
+    <name>yarn.scheduler.capacity.root.queueB.capacity</name>
+    <value>50</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.queueB.maximum-capacity</name>
+    <value>100</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.queueB.user-limit-factor</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>yarn.scheduler.capacity.root.queueB.state</name>
+    <value>RUNNING</value>
+  </property>
+
+</configuration>
