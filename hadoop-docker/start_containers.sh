@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # The 1st argument is set to YES if you want to create a master, the default is YES
@@ -7,6 +8,20 @@
 
 # Default Hadoop version
 HADOOP_VERSION=3.2.2
+MYSQL_VERSION=8.3.0
+
+# Start mysql container for hive metastore
+sudo docker rm -f hive-metastore-mysql &> /dev/null
+echo "Start mysql container in the hadoop network..."
+sudo docker run -itd \
+				--net=hadoop \
+				-p 3306:3306 \
+				-e MYSQL_ROOT_PASSWORD=1234 \
+				--name hive-metastore-mysql \
+				--hostname hive-metastore-mysql \
+				--mount type=bind,source=/home/dongpil/Desktop/TODO/bigdata/bigdata-manifest/metastore-mysql/mysql-init-script.sql,target=/docker-entrypoint-initdb.d/mysql-init-script.sql,readonly \
+				mysql:$MYSQL_VERSION # &> /dev/null
+
 
 # Set the default CREATE_HADOOP_MASTER is NO
 CREATE_HADOOP_MASTER=${1:-YES}
@@ -36,7 +51,7 @@ if [[ ${CREATE_HADOOP_MASTER} == "YES" ]]; then
 					-v /home/hadoop/hadooptmp-master:/home/hadoop/hdfs/hadooptmp2 \
 					--name hadoop-master \
 					--hostname hadoop-master \
-					dp/hadoop:$HADOOP_VERSION # &> /dev/null
+					dp/hadoop_master:$HADOOP_VERSION # &> /dev/null
 fi
 
 # Start hadoop slave containers
@@ -57,12 +72,12 @@ do
                 	-e HDFS_SECONDARYNAMENODE_USER=hadoop \
                 	-e YARN_RESOURCEMANAGER_USER=hadoop \
                 	-e YARN_NODEMANAGER_USER=hadoop \
-					-v /home/hadoop/datanode-slave$i:/home/hadoop/hdfs/datanode \
-					-v /home/hadoop/namenode-slave$i:/home/hadoop/hdfs/namenode \
-					-v /home/hadoop/hadooptmp-slave$i:/home/hadoop/hdfs/hadooptmp \
+					-v /home/hadoop/datanode-slave$i:/home/hadoop/hdfs/datanode2 \
+					-v /home/hadoop/namenode-slave$i:/home/hadoop/hdfs/namenode2 \
+					-v /home/hadoop/hadooptmp-slave$i:/home/hadoop/hdfs/hadooptmp2 \
 	                --name hadoop-slave$i \
 	                --hostname hadoop-slave$i \
-	                dp/hadoop:$HADOOP_VERSION #&> /dev/null
+	                dp/hadoop_slave:$HADOOP_VERSION #&> /dev/null
 	else
 		sudo docker run -itd \
 						--net=hadoop \
@@ -78,7 +93,7 @@ do
 						-v /home/hadoop/hadooptmp-slave$i:/home/hadoop/hdfs/hadooptmp2 \
 						--name hadoop-slave$i \
 						--hostname hadoop-slave$i \
-						dp/hadoop:$HADOOP_VERSION #&> /dev/null
+						dp/hadoop_slave:$HADOOP_VERSION #&> /dev/null
 	fi
 
 	i=$(($i+1))
