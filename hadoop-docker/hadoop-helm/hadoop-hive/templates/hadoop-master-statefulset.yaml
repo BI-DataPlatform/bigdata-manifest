@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hadoop-master
+spec:
+  serviceName: hadoop-master
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hadoop-master
+  template:
+    metadata:
+      labels:
+        app: hadoop-master
+    spec:
+      containers:
+      - name: hadoop-master
+        image: dp/hadoop_master:${HADOOP_VERSION}
+        ports:
+        - containerPort: 50070
+        - containerPort: 8088
+        - containerPort: 9000
+        env:
+        - name: HADOOP_SLAVE_NUMBER
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: HDFS_NAMENODE_USER
+          value: "hadoop"
+        - name: HDFS_DATANODE_USER
+          value: "hadoop"
+        - name: HDFS_SECONDARYNAMENODE_USER
+          value: "hadoop"
+        - name: YARN_RESOURCEMANAGER_USER
+          value: "hadoop"
+        - name: YARN_NODEMANAGER_USER
+          value: "hadoop"
+        volumeMounts:
+        - name: datanode-master
+          mountPath: /home/hadoop/hdfs/datanode2
+        - name: namenode-master
+          mountPath: /home/hadoop/hdfs/namenode2
+        - name: hadooptmp-master
+          mountPath: /home/hadoop/hdfs/hadooptmp2
+      volumes:
+      - name: datanode-master
+        persistentVolumeClaim:
+          claimName: datanode-master
+      - name: namenode-master
+        persistentVolumeClaim:
+          claimName: namenode-master
+      - name: hadooptmp-master
+        persistentVolumeClaim:
+          claimName: hadooptmp-master

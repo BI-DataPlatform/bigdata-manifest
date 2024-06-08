@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hadoop-worker
+spec:
+  serviceName: hadoop-worker
+  replicas: {{ .Values.hadoop.worker.replicas }}
+  selector:
+    matchLabels:
+      app: hadoop-worker
+  template:
+    metadata:
+      labels:
+        app: hadoop-worker
+    spec:
+      containers:
+      - name: hadoop-worker
+        image: dp/hadoop_slave:{{ .Values.hadoop.version }}
+        ports:
+        - containerPort: 50075
+        env:
+        - name: HADOOP_SLAVE_NUMBER
+          value: "{{ .Values.hadoop.worker.replicas }}"
+        - name: HDFS_NAMENODE_USER
+          value: "hadoop"
+        - name: HDFS_DATANODE_USER
+          value: "hadoop"
+        - name: HDFS_SECONDARYNAMENODE_USER
+          value: "hadoop"
+        - name: YARN_RESOURCEMANAGER_USER
+          value: "hadoop"
+        - name: YARN_NODEMANAGER_USER
+          value: "hadoop"
+        volumeMounts:
+        - name: datanode
+          mountPath: /home/hadoop/hdfs/datanode2
+        - name: namenode
+          mountPath: /home/hadoop/hdfs/namenode2
+        - name: hadooptmp
+          mountPath: /home/hadoop/hdfs/hadooptmp2
+  volumeClaimTemplates:
+  - metadata:
+      name: datanode
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 100Gi
+  - metadata:
+      name: namenode
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 50Gi
+  - metadata:
+      name: hadooptmp
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 20Gi
