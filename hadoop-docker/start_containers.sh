@@ -42,10 +42,10 @@ if [[ ${CREATE_HADOOP_MASTER} == "YES" ]]; then
 					-p 9000:9000 \
 					-e HADOOP_SLAVE_NUMBER=$HADOOP_SLAVE_NUMBER \
 					-e HDFS_NAMENODE_USER=hadoop \
-                	-e HDFS_DATANODE_USER=hadoop \
-                	-e HDFS_SECONDARYNAMENODE_USER=hadoop \
-                	-e YARN_RESOURCEMANAGER_USER=hadoop \
-                	-e YARN_NODEMANAGER_USER=hadoop \
+					-e HDFS_DATANODE_USER=hadoop \
+					-e HDFS_SECONDARYNAMENODE_USER=hadoop \
+					-e YARN_RESOURCEMANAGER_USER=hadoop \
+					-e YARN_NODEMANAGER_USER=hadoop \
 					-v /home/hadoop/namenode-master:/home/hadoop/hdfs/namenode2 \
 					-v /home/hadoop/hadooptmp-master:/home/hadoop/hdfs/hadooptmp2 \
 					--name hadoop-master \
@@ -63,29 +63,29 @@ do
 	# To avoid port conflict in the same host machine, the 1st hadoop slave port is mapped to 50075. From the other slaves the port is mapped to 2007$i
 	if [[ $i == 1 ]]; then
 		sudo docker run -itd \
-	                --net=hadoop \
+					--net=hadoop \
 					-p 50075:50075 \
 					-e HADOOP_SLAVE_NUMBER=$HADOOP_SLAVE_NUMBER \
 					-e HDFS_NAMENODE_USER=hadoop \
-                	-e HDFS_DATANODE_USER=hadoop \
-                	-e HDFS_SECONDARYNAMENODE_USER=hadoop \
-                	-e YARN_RESOURCEMANAGER_USER=hadoop \
-                	-e YARN_NODEMANAGER_USER=hadoop \
+					-e HDFS_DATANODE_USER=hadoop \
+					-e HDFS_SECONDARYNAMENODE_USER=hadoop \
+					-e YARN_RESOURCEMANAGER_USER=hadoop \
+					-e YARN_NODEMANAGER_USER=hadoop \
 					-v /home/hadoop/datanode-slave$i:/home/hadoop/hdfs/datanode2 \
 					-v /home/hadoop/hadooptmp-slave$i:/home/hadoop/hdfs/hadooptmp2 \
-	                --name hadoop-slave$i \
-	                --hostname hadoop-slave$i \
-	                biqa.tmax.com/de/hadoop_slave:20240627_v1 #&> /dev/null
+					--name hadoop-slave$i \
+					--hostname hadoop-slave$i \
+					biqa.tmax.com/de/hadoop_slave:20240627_v1 #&> /dev/null
 	else
 		sudo docker run -itd \
 						--net=hadoop \
 						-p 2007$i:50075 \
 						-e HADOOP_SLAVE_NUMBER=$HADOOP_SLAVE_NUMBER \
 						-e HDFS_NAMENODE_USER=hadoop \
-                		-e HDFS_DATANODE_USER=hadoop \
-                		-e HDFS_SECONDARYNAMENODE_USER=hadoop \
-                		-e YARN_RESOURCEMANAGER_USER=hadoop \
-                		-e YARN_NODEMANAGER_USER=hadoop \
+						-e HDFS_DATANODE_USER=hadoop \
+						-e HDFS_SECONDARYNAMENODE_USER=hadoop \
+						-e YARN_RESOURCEMANAGER_USER=hadoop \
+						-e YARN_NODEMANAGER_USER=hadoop \
 						-v /home/hadoop/datanode-slave$i:/home/hadoop/hdfs/datanode2 \
 						-v /home/hadoop/hadooptmp-slave$i:/home/hadoop/hdfs/hadooptmp2 \
 						--name hadoop-slave$i \
