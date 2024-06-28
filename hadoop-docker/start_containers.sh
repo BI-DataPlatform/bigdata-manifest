@@ -19,7 +19,7 @@ sudo docker run -itd \
 				-e MYSQL_ROOT_PASSWORD=1234 \
 				--name hive-metastore-mysql \
 				--hostname hive-metastore-mysql \
-				--mount type=bind,source=/home/dongpil/Desktop/TODO/bigdata/bigdata-manifest/metastore-mysql/mysql-init-script.sql,target=/docker-entrypoint-initdb.d/mysql-init-script.sql,readonly \
+				--mount type=bind,source=/home/dongpil/Desktop/TODO/bigdata/bigdata-manifest/hadoop-docker/metastore-mysql/mysql-init-script.sql,target=/docker-entrypoint-initdb.d/mysql-init-script.sql,readonly \
 				mysql:$MYSQL_VERSION # &> /dev/null
 
 
@@ -46,12 +46,11 @@ if [[ ${CREATE_HADOOP_MASTER} == "YES" ]]; then
                 	-e HDFS_SECONDARYNAMENODE_USER=hadoop \
                 	-e YARN_RESOURCEMANAGER_USER=hadoop \
                 	-e YARN_NODEMANAGER_USER=hadoop \
-					-v /home/hadoop/datanode-master:/home/hadoop/hdfs/datanode2 \
 					-v /home/hadoop/namenode-master:/home/hadoop/hdfs/namenode2 \
 					-v /home/hadoop/hadooptmp-master:/home/hadoop/hdfs/hadooptmp2 \
 					--name hadoop-master \
 					--hostname hadoop-master \
-					dp/hadoop_master:$HADOOP_VERSION # &> /dev/null
+					biqa.tmax.com/de/hadoop_master:20240627_v1 # &> /dev/null
 fi
 
 # Start hadoop slave containers
@@ -73,11 +72,10 @@ do
                 	-e YARN_RESOURCEMANAGER_USER=hadoop \
                 	-e YARN_NODEMANAGER_USER=hadoop \
 					-v /home/hadoop/datanode-slave$i:/home/hadoop/hdfs/datanode2 \
-					-v /home/hadoop/namenode-slave$i:/home/hadoop/hdfs/namenode2 \
 					-v /home/hadoop/hadooptmp-slave$i:/home/hadoop/hdfs/hadooptmp2 \
 	                --name hadoop-slave$i \
 	                --hostname hadoop-slave$i \
-	                dp/hadoop_slave:$HADOOP_VERSION #&> /dev/null
+	                biqa.tmax.com/de/hadoop_slave:20240627_v1 #&> /dev/null
 	else
 		sudo docker run -itd \
 						--net=hadoop \
@@ -89,11 +87,10 @@ do
                 		-e YARN_RESOURCEMANAGER_USER=hadoop \
                 		-e YARN_NODEMANAGER_USER=hadoop \
 						-v /home/hadoop/datanode-slave$i:/home/hadoop/hdfs/datanode2 \
-						-v /home/hadoop/namenode-slave$i:/home/hadoop/hdfs/namenode2 \
 						-v /home/hadoop/hadooptmp-slave$i:/home/hadoop/hdfs/hadooptmp2 \
 						--name hadoop-slave$i \
 						--hostname hadoop-slave$i \
-						dp/hadoop_slave:$HADOOP_VERSION #&> /dev/null
+						biqa.tmax.com/de/hadoop_slave:20240627_v1 #&> /dev/null
 	fi
 
 	i=$(($i+1))

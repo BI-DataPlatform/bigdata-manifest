@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <!-- 
+        <value>hdfs://hadoop-master-0.hadoop-master-headless.de.svc.cluster.local:9000/</value>
+        -->
+        <value>hdfs://hadoop-master:9000/</value>
+    </property>
+</configuration>

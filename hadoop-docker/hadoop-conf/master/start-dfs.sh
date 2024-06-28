@@ -89,6 +89,7 @@ if [[ -z "${NAMENODES}" ]]; then
   NAMENODES=$(hostname)
 fi
 
+# NAMENODES=${MASTER_HEADLESS_SERVICE}
 echo "Starting namenodes on [${NAMENODES}]"
 
 hadoop_uservar_su hdfs namenode "${HADOOP_HDFS_HOME}/bin/hdfs" \
@@ -103,75 +104,75 @@ HADOOP_JUMBO_RETCOUNTER=$?
 #---------------------------------------------------------
 # datanodes (using default workers file)
 
-echo "Starting datanodes"
-hadoop_uservar_su hdfs datanode "${HADOOP_HDFS_HOME}/bin/hdfs" \
-    --workers \
-    --config "${HADOOP_CONF_DIR}" \
-    --daemon start \
-    datanode ${dataStartOpt}
-(( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
+# echo "Starting datanodes"
+# hadoop_uservar_su hdfs datanode "${HADOOP_HDFS_HOME}/bin/hdfs" \
+#     --workers \
+#     --config "${HADOOP_CONF_DIR}" \
+#     --daemon start \
+#     datanode ${dataStartOpt}
+# (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
 
 #---------------------------------------------------------
 # secondary namenodes (if any)
 
-SECONDARY_NAMENODES=$("${HADOOP_HDFS_HOME}/bin/hdfs" getconf -secondarynamenodes 2>/dev/null)
+#SECONDARY_NAMENODES=$("${HADOOP_HDFS_HOME}/bin/hdfs" getconf -secondarynamenodes 2>/dev/null)
 
-if [[ -n "${SECONDARY_NAMENODES}" ]]; then
+# if [[ -n "${SECONDARY_NAMENODES}" ]]; then
 
-  if [[ "${NAMENODES}" =~ , ]]; then
+#   if [[ "${NAMENODES}" =~ , ]]; then
 
-    hadoop_error "WARNING: Highly available NameNode is configured."
-    hadoop_error "WARNING: Skipping SecondaryNameNode."
+#     hadoop_error "WARNING: Highly available NameNode is configured."
+#     hadoop_error "WARNING: Skipping SecondaryNameNode."
 
-  else
+#   else
 
-    if [[ "${SECONDARY_NAMENODES}" == "0.0.0.0" ]]; then
-      SECONDARY_NAMENODES=$(hostname)
-    fi
+#     if [[ "${SECONDARY_NAMENODES}" == "0.0.0.0" ]]; then
+#       SECONDARY_NAMENODES=$(hostname)
+#     fi
 
-    echo "Starting secondary namenodes [${SECONDARY_NAMENODES}]"
+#     echo "Starting secondary namenodes [${SECONDARY_NAMENODES}]"
 
-    hadoop_uservar_su hdfs secondarynamenode "${HADOOP_HDFS_HOME}/bin/hdfs" \
-      --workers \
-      --config "${HADOOP_CONF_DIR}" \
-      --hostnames "${SECONDARY_NAMENODES}" \
-      --daemon start \
-      secondarynamenode
-    (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
-  fi
-fi
+#     hadoop_uservar_su hdfs secondarynamenode "${HADOOP_HDFS_HOME}/bin/hdfs" \
+#       --workers \
+#       --config "${HADOOP_CONF_DIR}" \
+#       --hostnames "${SECONDARY_NAMENODES}" \
+#       --daemon start \
+#       secondarynamenode
+#     (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
+#   fi
+# fi
 
 #---------------------------------------------------------
 # quorumjournal nodes (if any)
 
-JOURNAL_NODES=$("${HADOOP_HDFS_HOME}/bin/hdfs" getconf -journalNodes 2>&-)
+#JOURNAL_NODES=$("${HADOOP_HDFS_HOME}/bin/hdfs" getconf -journalNodes 2>&-)
 
-if [[ "${#JOURNAL_NODES}" != 0 ]]; then
-  echo "Starting journal nodes [${JOURNAL_NODES}]"
+#if [[ "${#JOURNAL_NODES}" != 0 ]]; then
+#  echo "Starting journal nodes [${JOURNAL_NODES}]"
 
-  hadoop_uservar_su hdfs journalnode "${HADOOP_HDFS_HOME}/bin/hdfs" \
-    --workers \
-    --config "${HADOOP_CONF_DIR}" \
-    --hostnames "${JOURNAL_NODES}" \
-    --daemon start \
-    journalnode
-   (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
-fi
+#  hadoop_uservar_su hdfs journalnode "${HADOOP_HDFS_HOME}/bin/hdfs" \
+#    --workers \
+#    --config "${HADOOP_CONF_DIR}" \
+#    --hostnames "${JOURNAL_NODES}" \
+#    --daemon start \
+#    journalnode
+#   (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
+#fi
 
 #---------------------------------------------------------
 # ZK Failover controllers, if auto-HA is enabled
-AUTOHA_ENABLED=$("${HADOOP_HDFS_HOME}/bin/hdfs" getconf -confKey dfs.ha.automatic-failover.enabled | tr '[:upper:]' '[:lower:]')
-if [[ "${AUTOHA_ENABLED}" = "true" ]]; then
-  echo "Starting ZK Failover Controllers on NN hosts [${NAMENODES}]"
+#AUTOHA_ENABLED=$("${HADOOP_HDFS_HOME}/bin/hdfs" getconf -confKey dfs.ha.automatic-failover.enabled | tr '[:upper:]' '[:lower:]')
+#if [[ "${AUTOHA_ENABLED}" = "true" ]]; then
+#  echo "Starting ZK Failover Controllers on NN hosts [${NAMENODES}]"
 
-  hadoop_uservar_su hdfs zkfc "${HADOOP_HDFS_HOME}/bin/hdfs" \
-    --workers \
-    --config "${HADOOP_CONF_DIR}" \
-    --hostnames "${NAMENODES}" \
-    --daemon start \
-    zkfc
-  (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
-fi
+#  hadoop_uservar_su hdfs zkfc "${HADOOP_HDFS_HOME}/bin/hdfs" \
+#    --workers \
+#    --config "${HADOOP_CONF_DIR}" \
+#    --hostnames "${NAMENODES}" \
+#    --daemon start \
+#    zkfc
+#  (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
+#fi
 
 exit ${HADOOP_JUMBO_RETCOUNTER}
 
