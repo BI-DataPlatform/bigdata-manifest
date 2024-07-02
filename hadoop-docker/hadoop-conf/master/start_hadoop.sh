@@ -14,8 +14,8 @@ i=1
 while [ $i -lt $((HADOOP_SLAVE_NUMBER+1)) ]
 do
 	new_idx=$((i-1))
-	echo "hadoop-slave$i" >> $HADOOP_HOME/etc/hadoop/workers
-	# echo "hadoop-worker-$new_idx.hadoop-worker-headless.de.svc.cluster.local" >> $HADOOP_HOME/etc/hadoop/workers
+	# echo "hadoop-slave$i" >> $HADOOP_HOME/etc/hadoop/workers
+	echo "hadoop-worker-$new_idx.hadoop-worker-headless.de.svc.cluster.local" >> $HADOOP_HOME/etc/hadoop/workers
 	((i++))
 done 
 

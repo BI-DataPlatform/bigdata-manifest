@@ -3,7 +3,7 @@ kind: StatefulSet
 metadata:
   name: hadoop-master
 spec:
-  serviceName: hadoop-master
+  serviceName: hadoop-master-headless
   replicas: 1
   selector:
     matchLabels:
@@ -15,16 +15,15 @@ spec:
     spec:
       containers:
       - name: hadoop-master
-        image: dp/hadoop_master:${HADOOP_VERSION}
+        image: {{ .Values.Hadoop.Master.Image }}
         ports:
         - containerPort: 50070
         - containerPort: 8088
         - containerPort: 9000
+        - containerPort: 22
         env:
         - name: HADOOP_SLAVE_NUMBER
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
+          value: "{{ .Values.Hadoop.Worker.Replicas }}"
         - name: HDFS_NAMENODE_USER
           value: "hadoop"
         - name: HDFS_DATANODE_USER
@@ -35,20 +34,34 @@ spec:
           value: "hadoop"
         - name: YARN_NODEMANAGER_USER
           value: "hadoop"
+        - name: MASTER_HEADLESS_SERVICE
+          value: "hadoop-master-0.hadoop-master-headless.de.svc.cluster.local"
+        - name: WORKER1_HEADLESS_SERVICE
+          value: "hadoop-worker-0.hadoop-worker-headless.de.svc.cluster.local"
+        - name: WORKER2_HEADLESS_SERVICE
+          value: "hadoop-worker-1.hadoop-worker-headless.de.svc.cluster.local"
+        - name: WORKER2_HEADLESS_SERVICE
+          value: "hadoop-worker-2.hadoop-worker-headless.de.svc.cluster.local"
+        #command: ["/bin/sh", "-c"]
+        #args: ["sleep 1000"]
+        #args: ["echo $hostname", "echo $MASTER_HEADLESS_SERIVCE"]
         volumeMounts:
-        - name: datanode-master
-          mountPath: /home/hadoop/hdfs/datanode2
         - name: namenode-master
-          mountPath: /home/hadoop/hdfs/namenode2
+          mountPath: /home/hadoop/hdfs/namenode
         - name: hadooptmp-master
-          mountPath: /home/hadoop/hdfs/hadooptmp2
-      volumes:
-      - name: datanode-master
-        persistentVolumeClaim:
-          claimName: datanode-master
-      - name: namenode-master
-        persistentVolumeClaim:
-          claimName: namenode-master
-      - name: hadooptmp-master
-        persistentVolumeClaim:
-          claimName: hadooptmp-master
+          mountPath: /home/hadoop/hdfs/hadooptmp
+  volumeClaimTemplates:
+  - metadata:
+      name: namenode-master
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: hadooptmp-master
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Gi

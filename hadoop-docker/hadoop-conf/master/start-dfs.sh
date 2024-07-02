@@ -89,7 +89,7 @@ if [[ -z "${NAMENODES}" ]]; then
   NAMENODES=$(hostname)
 fi
 
-# NAMENODES=${MASTER_HEADLESS_SERVICE}
+NAMENODES=${MASTER_HEADLESS_SERVICE}
 echo "Starting namenodes on [${NAMENODES}]"
 
 hadoop_uservar_su hdfs namenode "${HADOOP_HDFS_HOME}/bin/hdfs" \

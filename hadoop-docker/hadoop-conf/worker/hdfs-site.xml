@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <configuration>
-
     <!--
     <property>
         <name>dfs.namenode.name.dir</name>
@@ -8,7 +7,6 @@
         <description>NameNode directory for namespace and transaction logs storage.</description>
     </property>
     -->
-
     <property>
         <name>dfs.datanode.data.dir</name>
         <value>/home/hadoop/hdfs/datanode</value>
@@ -18,13 +16,17 @@
         <name>hadoop.tmp.dir</name>
         <value>/home/hadoop/hdfs/hadooptmp</value>
     </property>
-
     <!-- NameNode의 주소를 명시적으로 설정 -->
+    <!--
     <property>
         <name>dfs.namenode.rpc-address</name>
         <value>hadoop-master:9000</value>
     </property>
-
+    -->    
+    <property>
+        <name>dfs.namenode.rpc-address</name>
+        <value>hadoop-master-0.hadoop-master-headless.de.svc.cluster.local:9000</value>
+    </property>
     <!-- 선택적으로 DataNode의 네트워크 주소 설정 -->
     <property>
         <name>dfs.datanode.address</name>
@@ -38,7 +40,6 @@
         <name>dfs.datanode.ipc.address</name>
         <value>0.0.0.0:9867</value>
     </property>
-
     <property>
         <name>dfs.replication</name>
         <value>2</value>

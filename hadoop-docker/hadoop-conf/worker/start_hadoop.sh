@@ -14,10 +14,11 @@ rm $HADOOP_HOME/etc/hadoop/workers
 i=1
 while [ $i -lt $((HADOOP_SLAVE_NUMBER+1)) ]
 do
-	echo "hadoop-slave$i" >> $HADOOP_HOME/etc/hadoop/workers
+	new_idx=$((i-1))
+	# echo "hadoop-slave$i" >> $HADOOP_HOME/etc/hadoop/workers
+	echo "hadoop-worker-$new_idx.hadoop-worker-headless.de.svc.cluster.local" >> $HADOOP_HOME/etc/hadoop/workers
 	((i++))
 done 
-
 echo "start_hadoop.sh execution success"
 
 # sleep 1000

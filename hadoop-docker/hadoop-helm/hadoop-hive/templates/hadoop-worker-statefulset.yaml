@@ -3,8 +3,8 @@ kind: StatefulSet
 metadata:
   name: hadoop-worker
 spec:
-  serviceName: hadoop-worker
-  replicas: {{ .Values.hadoop.worker.replicas }}
+  serviceName: hadoop-worker-headless
+  replicas: {{ .Values.Hadoop.Worker.Replicas }}  # Helm chart values에서 복제본 수를 동적으로 설정
   selector:
     matchLabels:
       app: hadoop-worker
@@ -15,12 +15,13 @@ spec:
     spec:
       containers:
       - name: hadoop-worker
-        image: dp/hadoop_slave:{{ .Values.hadoop.version }}
+        image: {{ .Values.Hadoop.Master.Image }} 
         ports:
         - containerPort: 50075
+        - containerPort: 22
         env:
         - name: HADOOP_SLAVE_NUMBER
-          value: "{{ .Values.hadoop.worker.replicas }}"
+          value: "{{ .Values.Hadoop.Worker.Replicas }}"
         - name: HDFS_NAMENODE_USER
           value: "hadoop"
         - name: HDFS_DATANODE_USER
@@ -31,35 +32,25 @@ spec:
           value: "hadoop"
         - name: YARN_NODEMANAGER_USER
           value: "hadoop"
+        #command: ["/bin/sh", "-c"]
+        #args: ["sleep 1000"]
         volumeMounts:
         - name: datanode
-          mountPath: /home/hadoop/hdfs/datanode2
-        - name: namenode
-          mountPath: /home/hadoop/hdfs/namenode2
+          mountPath: /home/hadoop/hdfs/datanode
         - name: hadooptmp
-          mountPath: /home/hadoop/hdfs/hadooptmp2
+          mountPath: /home/hadoop/hdfs/hadooptmp
   volumeClaimTemplates:
   - metadata:
       name: datanode
     spec:
       accessModes: ["ReadWriteOnce"]
-      storageClassName: "standard"
       resources:
         requests:
-          storage: 100Gi
-  - metadata:
-      name: namenode
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      storageClassName: "standard"
-      resources:
-        requests:
-          storage: 50Gi
+          storage: 10Gi
   - metadata:
       name: hadooptmp
     spec:
       accessModes: ["ReadWriteOnce"]
-      storageClassName: "standard"
       resources:
         requests:
-          storage: 20Gi
+          storage: 10Gi
