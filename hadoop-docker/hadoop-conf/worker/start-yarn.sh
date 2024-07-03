@@ -74,11 +74,11 @@ HADOOP_JUMBO_RETCOUNTER=0
 # fi
 
 # start nodemanager
-echo "Starting nodemanagers"
-hadoop_uservar_su yarn nodemanager "${HADOOP_YARN_HOME}/bin/yarn" \
-    --config "${HADOOP_CONF_DIR}" \
-    nodemanager
-(( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
+# echo "Starting nodemanagers"
+# hadoop_uservar_su yarn nodemanager "${HADOOP_YARN_HOME}/bin/yarn" \
+#     --config "${HADOOP_CONF_DIR}" \
+#     nodemanager
+# (( HADOOP_JUMBO_RETCOUNTER=HADOOP_JUMBO_RETCOUNTER + $? ))
 
 # --workers \
 # --daemon start \

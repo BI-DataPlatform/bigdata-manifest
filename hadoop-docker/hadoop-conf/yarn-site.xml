@@ -14,7 +14,7 @@
     </property>
     <property>
         <name>yarn.resourcemanager.hostname</name>
-        <value>hadoop-master</value>
+        <value>hadoop-master-0.hadoop-master-headless.de.svc.cluster.local</value>
     </property>
     <property>
         <name>yarn.nodemanager.resource.memory-mb</name>
