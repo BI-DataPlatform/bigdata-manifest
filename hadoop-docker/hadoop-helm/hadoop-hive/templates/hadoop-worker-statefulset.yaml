@@ -13,9 +13,24 @@ spec:
       labels:
         app: hadoop-worker
     spec:
+      #initContainers:
+      #- name: wait-for-all-workers
+      #  image: busybox
+      #  command: ['sh', '-c', '
+      #    max_index={{ .Values.Hadoop.Worker.Replicas }};
+      #    for index in $(seq 0 $((max_index-1))); do
+      #      while ! nslookup hadoop-worker-${index}.hadoop-worker-headless.de.svc.cluster.local; do
+      #        echo "Waiting for hadoop-worker-${index} to be ready...";
+      #        sleep 2;
+      #      done;
+      #    done;
+      #  ']
       containers:
       - name: hadoop-worker
-        image: {{ .Values.Hadoop.Master.Image }} 
+        image: {{ .Values.Hadoop.Worker.Image }} 
+        command: ['bash', '-c']
+        args: 
+          - "service ssh start && sleep 1000"
         ports:
         - containerPort: 50075
         - containerPort: 22
@@ -32,8 +47,6 @@ spec:
           value: "hadoop"
         - name: YARN_NODEMANAGER_USER
           value: "hadoop"
-        #command: ["/bin/sh", "-c"]
-        #args: ["sleep 1000"]
         volumeMounts:
         - name: datanode
           mountPath: /home/hadoop/hdfs/datanode
@@ -54,3 +67,4 @@ spec:
       resources:
         requests:
           storage: 10Gi
+
