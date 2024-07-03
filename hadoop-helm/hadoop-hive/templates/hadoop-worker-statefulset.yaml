@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hadoop-worker
+spec:
+  serviceName: hadoop-worker-headless
+  replicas: {{ .Values.Hadoop.Worker.Replicas }}  # Helm chart values에서 복제본 수를 동적으로 설정
+  selector:
+    matchLabels:
+      app: hadoop-worker
+  template:
+    metadata:
+      labels:
+        app: hadoop-worker
+    spec:
+      #initContainers:
+      #- name: wait-for-all-workers
+      #  image: busybox
+      #  command: ['sh', '-c', '
+      #    max_index={{ .Values.Hadoop.Worker.Replicas }};
+      #    for index in $(seq 0 $((max_index-1))); do
+      #      while ! nslookup hadoop-worker-${index}.hadoop-worker-headless.de.svc.cluster.local; do
+      #        echo "Waiting for hadoop-worker-${index} to be ready...";
+      #        sleep 2;
+      #      done;
+      #    done;
+      #  ']
+      containers:
+      - name: hadoop-worker
+        image: {{ .Values.Hadoop.Worker.Image }} 
+        command: ['bash', '-c']
+        args: 
+          - "service ssh start && sleep 1000"
+        ports:
+        - containerPort: 50075
+        - containerPort: 22
+        env:
+        - name: HADOOP_SLAVE_NUMBER
+          value: "{{ .Values.Hadoop.Worker.Replicas }}"
+        - name: HDFS_NAMENODE_USER
+          value: "hadoop"
+        - name: HDFS_DATANODE_USER
+          value: "hadoop"
+        - name: HDFS_SECONDARYNAMENODE_USER
+          value: "hadoop"
+        - name: YARN_RESOURCEMANAGER_USER
+          value: "hadoop"
+        - name: YARN_NODEMANAGER_USER
+          value: "hadoop"
+        volumeMounts:
+        - name: datanode
+          mountPath: /home/hadoop/hdfs/datanode
+        - name: hadooptmp
+          mountPath: /home/hadoop/hdfs/hadooptmp
+  volumeClaimTemplates:
+  - metadata:
+      name: datanode
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: hadooptmp
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+

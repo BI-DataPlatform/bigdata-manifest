@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hadoop-master
+spec:
+  serviceName: hadoop-master-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hadoop-master
+  template:
+    metadata:
+      labels:
+        app: hadoop-master
+    spec:
+      initContainers:
+      - name: check-ssh
+        image: ubuntu
+        volumeMounts:
+        - name: ssh-secret
+          mountPath: /root/.ssh
+          readOnly: true
+        command: ["sh", "-c"]
+        args:
+        - >
+          apt-get update && apt-get install -y openssh-client;
+          {{- range $i := until (int $.Values.Hadoop.Worker.Replicas) }}
+          chmod 600 /root/.ssh/id_rsa;
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 hadoop-worker-{{ $i }}.hadoop-worker-headless.{{ $.Values.Hadoop.Namespace }}.svc.cluster.local "echo connected" &&
+          echo "SSH connection to hadoop-worker-{{ $i }} successful" || echo "SSH connection to hadoop-worker-{{ $i }} failed";
+          {{- end }}
+          echo "All SSH checks completed"
+
+      containers:
+      - name: hadoop-master
+        image: {{ .Values.Hadoop.Master.Image }}
+        ports:
+        - containerPort: 50070
+        - containerPort: 8088
+        - containerPort: 9000
+        - containerPort: 22
+        command: ["/bin/sh", "-c"]
+        args:
+        - >
+          service ssh start;
+          echo "Waiting 300 seconds";
+          sleep 600;
+        env:
+        - name: HADOOP_SLAVE_NUMBER
+          value: "{{ .Values.Hadoop.Worker.Replicas }}"
+        - name: HDFS_NAMENODE_USER
+          value: "hadoop"
+        - name: HDFS_DATANODE_USER
+          value: "hadoop"
+        - name: HDFS_SECONDARYNAMENODE_USER
+          value: "hadoop"
+        - name: YARN_RESOURCEMANAGER_USER
+          value: "hadoop"
+        - name: YARN_NODEMANAGER_USER
+          value: "hadoop"
+        - name: MASTER_HEADLESS_SERVICE
+          value: "hadoop-master-0.hadoop-master-headless.{{ $.Values.Namespace }}.svc.cluster.local"
+        {{- range $i, $e := until (int .Values.Hadoop.Worker.Replicas) }}
+        - name: WORKER_{{ $i }}_HEADLESS_SERVICE
+          value: "hadoop-worker-{{ $i }}.hadoop-worker-headless.{{ $.Values.Namespace }}.svc.cluster.local"
+        {{- end }}
+        #- name: WORKER1_HEADLESS_SERVICE
+        #  value: "hadoop-worker-0.hadoop-worker-headless.{{ .Values.Hadoop.namespace }}.svc.cluster.local"
+        #- name: WORKER2_HEADLESS_SERVICE
+        #  value: "hadoop-worker-1.hadoop-worker-headless.{{ .Values.Hadoop.namespace }}.svc.cluster.local"
+        #- name: WORKER2_HEADLESS_SERVICE
+        #  value: "hadoop-worker-2.hadoop-worker-headless..svc.cluster.local"
+        #command: ["/bin/sh", "-c"]
+        #args: ["sleep 1000"]
+        #args: ["echo $hostname", "echo $MASTER_HEADLESS_SERIVCE"]
+        volumeMounts:
+        - name: namenode
+          mountPath: /home/hadoop/hdfs/namenode
+        - name: hadooptmp
+          mountPath: /home/hadoop/hdfs/hadooptmp
+      volumes:
+      - name: ssh-secret
+        secret:
+          secretName: ssh-secret    
+  volumeClaimTemplates:
+  - metadata:
+      name: namenode
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: hadooptmp
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Gi
+

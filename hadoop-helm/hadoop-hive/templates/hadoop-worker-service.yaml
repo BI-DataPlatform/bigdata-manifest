@@ -25,3 +25,5 @@ spec:
     - name: datanode
       port: 50075
       targetPort: 50075
+    - name: ssh
+      port: 22
